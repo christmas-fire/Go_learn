@@ -1,36 +1,55 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 )
 
-type User struct {
-	Name                  string
-	Age                   uint16
-	Money                 int16
-	Avg_grades, happiness float64
-	Hobbies               []string
-}
-
+// Обработчик для главной страницы
 func home_page(w http.ResponseWriter, r *http.Request) {
-	bob := User{"Bob", 25, -50, 4.2, 0.8, []string{"football", "dance"}}
-	tmpl, _ := template.ParseFiles("templates/home_page.html")
-	tmpl.Execute(w, bob)
+	tmpl, err := template.ParseFiles("templates/home_page.html")
+	if err != nil {
+		log.Printf("Ошибка при парсинге шаблона: %v", err)
+		http.Error(w, "Ошибка сервера", http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("Ошибка при выполнении шаблона: %v", err)
+		http.Error(w, "Ошибка сервера", http.StatusInternalServerError)
+		return
+	}
 }
 
-func contacts_page(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Contacts page")
+// Обработчик для страницы sasal.html
+func sasal_page(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("templates/sasal.html")
+	if err != nil {
+		log.Printf("Ошибка при парсинге шаблона: %v", err)
+		http.Error(w, "Ошибка сервера", http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("Ошибка при выполнении шаблона: %v", err)
+		http.Error(w, "Ошибка сервера", http.StatusInternalServerError)
+		return
+	}
 }
 
+// Обработчик для обработки запросов
 func handleRequest() {
 	http.HandleFunc("/", home_page)
-	http.HandleFunc("/contacts/", contacts_page)
-	http.ListenAndServe(":8080", nil)
+	http.HandleFunc("/sasal", sasal_page) // Добавлено маршрутизирование для sasal_page
+	log.Println("Сервер запущен на порту 8080")
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatalf("Ошибка при запуске сервера: %v", err)
+	}
 }
 
 func main() {
-
+	log.Println("Запуск сервера...")
 	handleRequest()
 }
